@@ -12,7 +12,7 @@ const button = document.querySelector('button');
 button.onclick = function() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').drawImage(videoSelect, 0, 0, canvas.width, canvas.height);
 };
 
 /*const constraints = {
@@ -74,8 +74,8 @@ function start() {
   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
 
-audioInputSelect.onchange = start;
-audioOutputSelect.onchange = changeAudioDestination;
+//audioInputSelect.onchange = start;
+//audioOutputSelect.onchange = changeAudioDestination;
 
 videoSelect.onchange = start;
 
