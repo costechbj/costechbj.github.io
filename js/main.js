@@ -1,7 +1,7 @@
 'use strict';
 
 // Put variables in global scope to make them available to the browser console.
-//const video = document.querySelector('video');
+const videoElement = document.querySelector('video');
 const canvas = window.canvas = document.querySelector('canvas');
 canvas.width = 817;
 canvas.height = 1088;
@@ -10,9 +10,9 @@ const selectors = [videoSelect];
 
 const button = document.querySelector('button');
 button.onclick = function() {
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(videoSelect, 0, 0, canvas.width, canvas.height);
+  canvas.width = videoElement.videoWidth;
+  canvas.height = videoElement.videoHeight;
+  canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 };
 
 /*const constraints = {
