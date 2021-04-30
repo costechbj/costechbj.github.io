@@ -15,7 +15,7 @@ button.onclick = function() {
   canvas.height = videoElement.videoHeight;
   canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
   
-  dataURL = canvas.toDataURL('image/png',1.0);
+  const dataURL = canvas.toDataURL('image/png',1.0);
   communicate(dataURL);
 
   /*$.ajax({
@@ -161,9 +161,9 @@ function communicate(img_base64_url) {
         }
     }
   })
-  .done(function (response_data) {
-     drawResult(response_data.results); // 等接收到后端返回的数据后，把数据显示在图片上
-   });
+  //.done(function (response_data) {
+  //   drawResult(response_data.results); // 等接收到后端返回的数据后，把数据显示在图片上
+  // });
 }
   
 // 在图片上标出结果
