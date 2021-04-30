@@ -1,6 +1,7 @@
 'use strict';
 
 // Put variables in global scope to make them available to the browser console.
+const URL = "http://124.70.7.164:8090/detect/"    // 后端服务器地址
 const videoElement = document.querySelector('video');
 const canvas = window.canvas = document.querySelector('canvas');
 canvas.width = 817;
@@ -13,6 +14,19 @@ button.onclick = function() {
   canvas.width = videoElement.videoWidth;
   canvas.height = videoElement.videoHeight;
   canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+  
+  dataURL = canvas.toDataURL('image/png',1.0);
+  communicate(dataURL);
+
+  /*$.ajax({
+        type: "POST",
+        url: "/saveimage",
+        data:{
+          imageBase64: dataURL
+        }
+      }).done(function(o) {
+    window.location.href = '/process' ; */
+
 };
 
 /*const constraints = {
@@ -81,14 +95,109 @@ videoSelect.onchange = start;
 
 start();
 
-/*function handleSuccess(stream) {
-  window.stream = stream; // make stream available to browser console
-  video.srcObject = stream;
-}
 
-function handleError(error) {
-  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
-}
+//draw boxes and labels on each detected object
+function drawBoxes(objects) {
 
-navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
-*/
+    //clear the previous drawings
+    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+    //filter out objects that contain a class_name and then draw boxes and labels on each
+    objects.filter(object => object.class_name).forEach(object => {        
+        
+        if (selectedObjectList == null || selectedObjectList.length == 0 || selectedObjectList.indexOf(object.class_name.toLowerCase()) > -1){
+            console.log("presente")
+        
+            let x = object.x * drawCanvas.width;
+            let y = object.y * drawCanvas.height;
+            let width = (object.width * drawCanvas.width) - x;
+            let height = (object.height * drawCanvas.height) - y;
+
+            //flip the x axis if local video is mirrored
+            if (mirror) {
+                x = drawCanvas.width - (x + width)
+            }
+
+            drawCtx.fillText(object.class_name + " - " + Math.round(object.score * 100) + "%", x + 5, y + 20);
+            drawCtx.strokeRect(x, y, width, height);
+        }
+    });
+}
+  
+  
+// 发送图片到服务器，并获取服务器返回的结果，显示在画布上
+function communicate(img_base64_url) {
+  $.ajax({ // 以AJAX方式，异步发送请求
+    url: URL, // 发送给后端的地址
+    type: "POST", //发送的方式
+    contentType: "application/json", // 文件的类型
+    data: JSON.stringify({ "image": img_base64_url }), //JSON化发送的base64图片数据
+    dataType: "json", // 接受的接收图片的格式
+    tryCount : 0,
+    retryLimit : 2,
+    timeout: 10000,
+    success : function(response_data) {
+      console.log("图片识别成功");
+      drawResult(response_data.results); // 等接收到后端返回的数据后，把数据显示在图片上
+    },
+    error : function(xhr, textStatus, errorThrown ) {
+        if (textStatus == 'timeout') {
+            this.tryCount++;
+            if (this.tryCount <= this.retryLimit) {
+                //try again
+                $.ajax(this);
+                return;
+            }
+            alert("图片上传重传次数过多\n请刷新页面，或重新上传本地图片");            
+            return;
+        }
+        alert("图片上传失败\n请刷新页面，或重新上传本地图片");
+        if (xhr.status == 500) {
+            //handle error
+            console.log("图片加载失败,错误代码500")
+        } else {
+            //handle error
+            console.log("图片加载失败,未知错误")
+        }
+    }
+  })
+  .done(function (response_data) {
+     drawResult(response_data.results); // 等接收到后端返回的数据后，把数据显示在图片上
+   });
+}
+  
+// 在图片上标出结果
+function drawResult(results) {
+  canvas.width = image.width;
+  canvas.height = image.height;
+  ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  imageConversion.imagetoCanvas(image,{
+    width: image.width,   //result image's width
+  }).then(drawCanvas=>{
+    console.log("drawCanvas:",drawCanvas);
+    ctx.drawImage(drawCanvas, 0, 0);
+    for (bboxInfo of results) { // 边框
+      bbox = bboxInfo['bbox'];
+
+      ctx.beginPath();
+      ctx.lineWidth = "4";
+      ctx.strokeStyle = "#23abf2";
+
+      ctx.rect(bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1]);
+      ctx.stroke();
+    };
+    for (bboxInfo of results) { // 文字
+      bbox = bboxInfo['bbox'];
+      class_name = bboxInfo['name'];
+      score = bboxInfo['conf'];
+
+      ctx.fillStyle = "#F23A47";
+      ctx.font = "30px Arial";
+
+      let content = class_name + " " + parseFloat(score).toFixed(2);
+      ctx.fillText(content, bbox[0], bbox[1] < 20 ? bbox[1] + 30 : bbox[1] - 5);
+    }
+  });
+}
+  
