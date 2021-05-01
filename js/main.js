@@ -1,11 +1,14 @@
 'use strict';
 
 // Put variables in global scope to make them available to the browser console.
-const URL = "http://124.70.7.164:8090/detect/"    // 后端服务器地址
+const URL = "https://hwcloud.ddns.net/detect/"    // 后端服务器地址
+
 const videoElement = document.querySelector('video');
 const canvas = window.canvas = document.querySelector('canvas');
 canvas.width = 817;
 canvas.height = 1088;
+const ctx = canvas.getContext("2d");
+
 const videoSelect = document.querySelector('select#videoSource');
 const selectors = [videoSelect];
 
@@ -13,7 +16,7 @@ const button = document.querySelector('button');
 button.onclick = function() {
   canvas.width = videoElement.videoWidth;
   canvas.height = videoElement.videoHeight;
-  canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
   
   const dataURL = canvas.toDataURL('image/png',1.0);
   communicate(dataURL);
@@ -135,9 +138,10 @@ function communicate(img_base64_url) {
     dataType: "json", // 接受的接收图片的格式
     tryCount : 0,
     retryLimit : 2,
-    timeout: 10000,
+    timeout: 60000,
     success : function(response_data) {
       console.log("图片识别成功");
+      console.log(response_data);
       drawResult(response_data.results); // 等接收到后端返回的数据后，把数据显示在图片上
     },
     error : function(xhr, textStatus, errorThrown ) {
@@ -167,37 +171,37 @@ function communicate(img_base64_url) {
 }
   
 // 在图片上标出结果
-function drawResult(results) {
-  canvas.width = image.width;
-  canvas.height = image.height;
-  ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  imageConversion.imagetoCanvas(image,{
-    width: image.width,   //result image's width
-  }).then(drawCanvas=>{
-    console.log("drawCanvas:",drawCanvas);
-    ctx.drawImage(drawCanvas, 0, 0);
-    for (bboxInfo of results) { // 边框
-      bbox = bboxInfo['bbox'];
+  const image = document.getElementById('source');
+
+  //canvas.width = image.width;
+  //canvas.height = image.height;
+  //const ctx = canvas.getContext('2d');
+  
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  console.log(results)
+
+    for (let bbox  of results) { // 边框
+      //bbox = bboxInfo['bbox'];
 
       ctx.beginPath();
-      ctx.lineWidth = "4";
+      ctx.lineWidth = "1";
       ctx.strokeStyle = "#23abf2";
 
-      ctx.rect(bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1]);
+      ctx.rect(bbox[2], bbox[3], bbox[4] - bbox[2], bbox[5] - bbox[3]);
       ctx.stroke();
     };
-    for (bboxInfo of results) { // 文字
-      bbox = bboxInfo['bbox'];
-      class_name = bboxInfo['name'];
-      score = bboxInfo['conf'];
+
+    //for (let bbox of results) { // 文字
+      //bbox = bboxInfo['bbox'];
+      //class_name = bboxInfo['name'];
+    //  const score = bbox[1];
 
       ctx.fillStyle = "#F23A47";
-      ctx.font = "30px Arial";
+      ctx.font = "3px Arial";
 
-      let content = class_name + " " + parseFloat(score).toFixed(2);
-      ctx.fillText(content, bbox[0], bbox[1] < 20 ? bbox[1] + 30 : bbox[1] - 5);
-    }
-  });
+   //   let content = parseFloat(score).toFixed(2);
+      ctx.fillText("烟草粉螟：" + results.length + "只", 10, 30);
+   // }
 }
   
