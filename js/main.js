@@ -171,6 +171,7 @@ function communicate(img_base64_url) {
 }
   
 // 在图片上标出结果
+function drawResult(results) {
   const image = document.getElementById('source');
 
   //canvas.width = image.width;
