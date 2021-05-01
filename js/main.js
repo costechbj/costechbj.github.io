@@ -142,7 +142,7 @@ function communicate(img_base64_url) {
     success : function(response_data) {
       console.log("图片识别成功");
       console.log(response_data);
-      drawResult(response_data.results); // 等接收到后端返回的数据后，把数据显示在图片上
+      drawResult(JSON.parse(response_data).boxes); // 等接收到后端返回的数据后，把数据显示在图片上
     },
     error : function(xhr, textStatus, errorThrown ) {
         if (textStatus == 'timeout') {
