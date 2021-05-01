@@ -186,8 +186,8 @@ function drawResult(results) {
       //bbox = bboxInfo['bbox'];
 
       ctx.beginPath();
-      ctx.lineWidth = "1";
-      ctx.strokeStyle = "#23abf2";
+      ctx.lineWidth = "2";
+      ctx.strokeStyle = "#32CD32";
 
       ctx.rect(bbox[2], bbox[3], bbox[4] - bbox[2], bbox[5] - bbox[3]);
       ctx.stroke();
@@ -198,8 +198,8 @@ function drawResult(results) {
       //class_name = bboxInfo['name'];
     //  const score = bbox[1];
 
-      ctx.fillStyle = "#F23A47";
-      ctx.font = "3px Arial";
+      ctx.fillStyle = "#DC143C";
+      ctx.font = "15px Arial";
 
    //   let content = parseFloat(score).toFixed(2);
       ctx.fillText("烟草粉螟：" + results.length + "只", 10, 30);
