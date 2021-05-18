@@ -1,7 +1,7 @@
 'use strict';
 
 // Put variables in global scope to make them available to the browser console.
-const URL = "https://aialgorithm.tech/detect/"    // 后端服务器地址
+const URL = "https://aialgorithm.tech:8443/detect/"    // 后端服务器地址
 
 const videoElement = document.querySelector('video');
 const canvas = window.canvas = document.querySelector('canvas');
